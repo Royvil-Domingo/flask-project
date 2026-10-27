@@ -18,3 +18,296 @@ body {
 .badge {
     font-size: 0.85rem;
 }
+
+/* ============================================================
+   Equipment Borrowing & Return System — "Ledger & Tag"
+   A kraft-tag / circulation-desk visual system: status reads
+   like a stamped tag, data reads in mono, everything else stays
+   quiet. Overrides Bootstrap's defaults in place — no template
+   changes required, this file just has to load after Bootstrap's
+   CSS (it already does, in base.html).
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root {
+  /* palette — kraft paper, graphite ink, tool-tag amber, status inks */
+  --ink: #1E2420;
+  --ink-soft: #4B5048;
+  --paper: #EDE7D8;
+  --paper-raised: #F7F3E7;
+  --line: #C7BE9F;
+  --line-soft: #DAD3BC;
+
+  --amber: #C8932A;
+  --amber-hover: #B6811F;
+  --amber-ink: #5A3E0E;
+
+  --moss: #3E6B4F;
+  --moss-bg: #E1EAE1;
+  --steel: #46586B;
+  --steel-bg: #E4E8EC;
+  --rust: #A6402D;
+  --rust-bg: #F3DFD9;
+
+  /* type */
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius: 4px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+}
+
+/* one orchestrated load-in, not per-element */
+body { animation: page-in 320ms ease-out both; }
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+  * { transition: none !important; animation: none !important; }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+h2 {
+  font-size: 2rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+a { color: var(--steel); }
+a:hover { color: var(--ink); }
+
+::selection { background: var(--amber); color: var(--ink); }
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------
+   Navbar — solid ink bar, amber rule underneath, amber underline
+   on hover instead of a background highlight
+   --------------------------------------------------------------- */
+.navbar.bg-dark {
+  background-color: var(--ink) !important;
+  border-bottom: 3px solid var(--amber);
+}
+
+.navbar-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+}
+
+.navbar .nav-link {
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: #D8D4C4 !important;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.navbar .nav-link:hover {
+  color: #fff !important;
+  border-bottom-color: var(--amber);
+}
+
+.navbar-text { font-family: var(--font-mono); font-size: 0.85rem; }
+
+.navbar .badge {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------
+   Alerts — flat notice strip, colored border instead of a
+   bootstrap gradient fill
+   --------------------------------------------------------------- */
+.alert {
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 500;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.alert-danger  { background: var(--rust-bg); border-color: var(--rust); color: var(--rust); }
+.alert-success { background: var(--moss-bg); border-color: var(--moss); color: var(--moss); }
+
+.alert.is-dismissing { opacity: 0; transform: translateY(-6px); }
+
+/* ---------------------------------------------------------------
+   Cards — flat kraft tiles, meaning-coded left rule instead of
+   a rounded card + soft shadow
+   --------------------------------------------------------------- */
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: none !important; /* overrides bootstrap's .shadow-sm !important */
+}
+
+.card-title { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; }
+
+.card-body h3 { font-family: var(--font-mono); font-weight: 600; font-size: 2.25rem; }
+
+.card-body h6 {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* dashboard stat tiles — left rule colored by what the tile means */
+.row.g-3 > [class*="col-"] .card { border-left: 4px solid var(--line); }
+.row.g-3 > [class*="col-"]:nth-child(2) .card { border-left-color: var(--moss); }
+.row.g-3 > [class*="col-"]:nth-child(3) .card { border-left-color: var(--steel); }
+.row.g-3 > [class*="col-"]:nth-child(4) .card { border-left-color: var(--rust); }
+
+/* ---------------------------------------------------------------
+   Buttons — square-ish corners, amber primary, no pill shapes
+   --------------------------------------------------------------- */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--radius);
+  padding: 0.5rem 1.1rem;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.btn-primary { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+.btn-primary:hover, .btn-primary:focus { background: var(--amber-hover); border-color: var(--amber-hover); color: var(--ink); }
+
+.btn-outline-secondary { background: transparent; border-color: var(--ink); color: var(--ink); }
+.btn-outline-secondary:hover { background: var(--ink); border-color: var(--ink); color: var(--paper-raised); }
+
+.btn-outline-primary { border-color: var(--steel); color: var(--steel); }
+.btn-outline-primary:hover { background: var(--steel); border-color: var(--steel); color: #fff; }
+
+.btn-outline-danger { border-color: var(--rust); color: var(--rust); }
+.btn-outline-danger:hover { background: var(--rust); border-color: var(--rust); color: #fff; }
+
+.btn-outline-success { border-color: var(--moss); color: var(--moss); }
+.btn-outline-success:hover { background: var(--moss); border-color: var(--moss); color: #fff; }
+
+.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
+
+/* ---------------------------------------------------------------
+   Forms — ledger-line inputs instead of boxed fields
+   --------------------------------------------------------------- */
+.form-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.3rem;
+}
+
+.form-control, .form-select {
+  background: var(--paper-raised);
+  border: none;
+  border-bottom: 2px solid var(--line);
+  border-radius: 0;
+  padding: 0.55rem 0.25rem;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+.form-control:focus, .form-select:focus {
+  background: var(--paper-raised);
+  border-bottom-color: var(--amber);
+  box-shadow: none;
+  outline: none;
+}
+
+.form-control::placeholder { color: #9A9279; }
+
+/* quantities, ids and dates read as data everywhere in the app */
+input[type="number"], input[type="date"] { font-family: var(--font-mono); }
+
+/* ---------------------------------------------------------------
+   Tables — ledger rows: ink underline on the header, mono
+   numerals, hairline row dividers instead of a grey header fill
+   --------------------------------------------------------------- */
+.table { font-family: var(--font-body); border-collapse: collapse; }
+
+.table thead { background: transparent !important; }
+
+.table thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  border-bottom: 2px solid var(--ink);
+  border-top: none;
+  padding-bottom: 0.6rem;
+}
+
+.table td, .table th { border-color: var(--line-soft); vertical-align: middle; }
+
+.table-striped > tbody > tr:nth-of-type(odd) > * { background: var(--paper-raised); }
+.table tbody tr:hover > * { background: #F1EADA; }
+
+.table td:nth-child(4) { font-family: var(--font-mono); } /* quantity column */
+
+/* right-edge fade when a table overflows horizontally (toggled by main.js) */
+.table-responsive { position: relative; }
+.table-responsive.has-scroll::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, transparent, rgba(30, 36, 32, 0.1));
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------
+   Badges — stamped status tags
+   --------------------------------------------------------------- */
+.badge {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  padding: 0.35em 0.55em;
+  border: 1.5px solid transparent;
+}
+
+.badge.bg-success   { background: var(--moss-bg) !important;  color: var(--moss) !important;  border-color: var(--moss); }
+.badge.bg-danger    { background: var(--rust-bg) !important;  color: var(--rust) !important;  border-color: var(--rust); }
+.badge.bg-primary   { background: var(--steel-bg) !important; color: var(--steel) !important; border-color: var(--steel); }
+.badge.bg-warning   { background: var(--amber) !important;    color: var(--ink) !important;   border-color: var(--amber-ink); }
+.badge.bg-secondary { background: var(--line-soft) !important; color: var(--ink-soft) !important; border-color: var(--line); }
+
+/* ---------------------------------------------------------------
+   Misc
+   --------------------------------------------------------------- */
+.text-muted { color: var(--ink-soft) !important; }
+
+small.text-danger { font-family: var(--font-body); font-size: 0.8rem; }
