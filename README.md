@@ -6,7 +6,7 @@ A Flask web app for tracking equipment availability and borrowing transactions.
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/<your-username>/<repo-name>.git
+   git clone https://github.com/Royvil-Domingo/flask-project.git
    cd <repo-name>
    ```
 
