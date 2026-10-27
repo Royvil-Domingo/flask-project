@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if item else 'Add' }} Equipment{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-4">{{ 'Edit' if item else 'Register' }} Equipment</h3>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ item.name if item else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ item.description or '' if item else '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="total_quantity" class="form-label">Total Quantity</label>
+                        <input type="number" min="1" class="form-control" id="total_quantity" name="total_quantity" value="{{ item.total_quantity if item else '' }}" required>
+                        {% if item %}
+                            <small class="text-muted">Currently borrowed: {{ item.borrowed_quantity }}</small>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ 'Save Changes' if item else 'Register Equipment' }}</button>
+                    <a href="{{ url_for('equipment.list_equipment') }}" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

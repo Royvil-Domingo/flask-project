@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Equipment Types</h6>
+                <h3>{{ total_equipment_types }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Available Units</h6>
+                <h3 class="text-success">{{ available_units }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Borrowed Units</h6>
+                <h3 class="text-primary">{{ borrowed_units }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Overdue</h6>
+                <h3 class="text-danger">{{ overdue_borrowings }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ url_for('borrowings.new_borrowing') }}" class="btn btn-primary">+ New Borrowing</a>
+    {% if current_user.is_admin %}
+        <a href="{{ url_for('equipment.add_equipment') }}" class="btn btn-outline-secondary">+ Add Equipment</a>
+        <a href="{{ url_for('borrowers.add_borrower') }}" class="btn btn-outline-secondary">+ Add Borrower</a>
+    {% endif %}
+</div>
+
+<h5>Recent Borrowings</h5>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Equipment</th>
+                <th>Borrower</th>
+                <th>Qty</th>
+                <th>Due</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in recent_borrowings %}
+            <tr>
+                <td>{{ b.id }}</td>
+                <td>{{ b.equipment.name }}</td>
+                <td>{{ b.borrower.name }}</td>
+                <td>{{ b.quantity }}</td>
+                <td>{{ b.due_on.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if b.is_overdue %}
+                        <span class="badge bg-danger">Overdue</span>
+                    {% elif b.status == 'returned' %}
+                        <span class="badge bg-success">Returned</span>
+                    {% else %}
+                        <span class="badge bg-primary">Borrowed</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted">No borrowings yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

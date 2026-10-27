@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Borrowings{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Borrowings</h2>
+    <a href="{{ url_for('borrowings.new_borrowing') }}" class="btn btn-primary">+ New Borrowing</a>
+</div>
+
+<form method="GET" class="row g-2 mb-3">
+    <div class="col-md-6">
+        <input type="text" name="q" class="form-control" placeholder="Search by equipment or borrower..." value="{{ query }}">
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="" {{ 'selected' if not status_filter }}>All</option>
+            <option value="borrowed" {{ 'selected' if status_filter == 'borrowed' }}>Borrowed</option>
+            <option value="overdue" {{ 'selected' if status_filter == 'overdue' }}>Overdue</option>
+            <option value="returned" {{ 'selected' if status_filter == 'returned' }}>Returned</option>
+        </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-secondary">Filter</button>
+        <a href="{{ url_for('borrowings.list_borrowings') }}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Equipment</th>
+                <th>Borrower</th>
+                <th>Qty</th>
+                <th>Borrowed On</th>
+                <th>Due On</th>
+                <th>Returned On</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in items %}
+            <tr>
+                <td>{{ b.id }}</td>
+                <td>{{ b.equipment.name }}</td>
+                <td>{{ b.borrower.name }}</td>
+                <td>{{ b.quantity }}</td>
+                <td>{{ b.borrowed_on.strftime('%Y-%m-%d') }}</td>
+                <td>{{ b.due_on.strftime('%Y-%m-%d') }}</td>
+                <td>{{ b.returned_on.strftime('%Y-%m-%d') if b.returned_on else '—' }}</td>
+                <td>
+                    {% if b.is_overdue %}
+                        <span class="badge bg-danger">Overdue</span>
+                    {% elif b.status == 'returned' %}
+                        <span class="badge bg-success">Returned</span>
+                    {% else %}
+                        <span class="badge bg-primary">Borrowed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if b.status == 'borrowed' %}
+                    <form action="{{ url_for('borrowings.return_borrowing', borrowing_id=b.id) }}" method="POST" onsubmit="return confirm('Mark this as returned?');">
+                        <button type="submit" class="btn btn-sm btn-outline-success">Mark Returned</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="9" class="text-center text-muted">No borrowings found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
