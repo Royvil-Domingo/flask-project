@@ -1,31 +1,10 @@
-body {
-    background-color: #f4f6f9;
-}
-
-.navbar-brand {
-    font-weight: 600;
-}
-
-.card {
-    border: none;
-    border-radius: 10px;
-}
-
-.table thead {
-    background-color: #eef1f5;
-}
-
-.badge {
-    font-size: 0.85rem;
-}
-
 /* ============================================================
    Equipment Borrowing & Return System — "Ledger & Tag"
    A kraft-tag / circulation-desk visual system: status reads
    like a stamped tag, data reads in mono, everything else stays
    quiet. Overrides Bootstrap's defaults in place — no template
-   changes required, this file just has to load after Bootstrap's
-   CSS (it already does, in base.html).
+   changes required for most of this, it just has to load after
+   Bootstrap's CSS (it already does, in base.html).
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
@@ -304,6 +283,71 @@ input[type="number"], input[type="date"] { font-family: var(--font-mono); }
 .badge.bg-primary   { background: var(--steel-bg) !important; color: var(--steel) !important; border-color: var(--steel); }
 .badge.bg-warning   { background: var(--amber) !important;    color: var(--ink) !important;   border-color: var(--amber-ink); }
 .badge.bg-secondary { background: var(--line-soft) !important; color: var(--ink-soft) !important; border-color: var(--line); }
+
+/* ---------------------------------------------------------------
+   Auth split panel — sign in / create account
+   Two pages (login.html, register.html), each a mirror image of
+   the other, built from the same .auth-shell scaffold so the
+   "switch" between them (see main.js) reads as one motion.
+   --------------------------------------------------------------- */
+.auth-shell {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 480px;
+  max-width: 880px;
+  margin: 2.5rem auto;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.auth-shell.is-mirrored { flex-direction: row-reverse; }
+
+.auth-shell .panel-form {
+  flex: 1 1 340px;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: opacity 320ms ease, transform 320ms ease;
+}
+
+.auth-shell .panel-promo {
+  flex: 1 1 280px;
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(155deg, var(--amber) 0%, var(--amber-hover) 100%);
+  transition: opacity 320ms ease, flex-basis 420ms ease;
+}
+
+.auth-heading { border-bottom: none; margin-bottom: 0.25rem; padding-bottom: 0; font-size: 2.25rem; }
+.auth-subtext { color: var(--ink-soft); margin-bottom: 1.75rem; }
+
+.panel-promo h2 { color: var(--ink); font-size: 2rem; margin-bottom: 0.75rem; }
+.panel-promo p { color: var(--amber-ink); margin-bottom: 1.75rem; max-width: 34ch; }
+
+.auth-switch {
+  align-self: flex-start;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: transparent;
+}
+
+.auth-switch:hover { background: var(--ink); border-color: var(--ink); color: var(--paper-raised); }
+
+/* the "curtain" transition main.js triggers just before navigating
+   to the other auth page */
+.auth-shell.is-transitioning .panel-form { opacity: 0; transform: scale(0.98); }
+.auth-shell.is-transitioning .panel-promo { flex-basis: 100%; }
+
+@media (max-width: 620px) {
+  .auth-shell { margin: 1.25rem; min-height: 0; }
+  .auth-shell, .auth-shell.is-mirrored { flex-direction: column; }
+  .auth-shell .panel-form, .auth-shell .panel-promo { padding: 2rem 1.5rem; }
+}
 
 /* ---------------------------------------------------------------
    Misc
