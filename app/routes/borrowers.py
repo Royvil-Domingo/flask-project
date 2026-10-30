@@ -10,6 +10,7 @@ borrowers = Blueprint('borrowers', __name__, url_prefix='/borrowers')
 
 @borrowers.route('/')
 @login_required
+@admin_required
 def list_borrowers():
     query = request.args.get('q', '').strip()
     borrowers_query = Borrower.query
@@ -73,9 +74,13 @@ def edit_borrower(item_id):
 def delete_borrower(item_id):
     item = Borrower.query.get_or_404(item_id)
 
-    active_borrowings = Borrowing.query.filter_by(borrower_id=item.id, status='borrowed').count()
+    active_borrowings = Borrowing.query.filter(
+        Borrowing.borrower_id == item.id,
+        Borrowing.status.in_(['pending', 'borrowed'])
+    ).count()
     if active_borrowings > 0:
-        flash('Cannot delete a borrower with active borrowings.', category='error')
+        flash('Cannot delete a borrower with pending or active borrowings.', category='error')
+    
     else:
         db.session.delete(item)
         db.session.commit()

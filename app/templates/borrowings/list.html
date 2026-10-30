@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Borrowings{% endblock %}
+{% block title %}Borrowing History{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Borrowings</h2>
-    <a href="{{ url_for('borrowings.new_borrowing') }}" class="btn btn-primary">+ New Borrowing</a>
+    <h2>Borrowing History</h2>
+    <a href="{{ url_for('borrowings.pending_requests') }}" class="btn btn-primary">Review Pending Requests</a>
 </div>
 
 <form method="GET" class="row g-2 mb-3">
@@ -13,8 +13,10 @@
     <div class="col-md-3">
         <select name="status" class="form-select">
             <option value="" {{ 'selected' if not status_filter }}>All</option>
+            <option value="pending" {{ 'selected' if status_filter == 'pending' }}>Pending</option>
             <option value="borrowed" {{ 'selected' if status_filter == 'borrowed' }}>Borrowed</option>
             <option value="overdue" {{ 'selected' if status_filter == 'overdue' }}>Overdue</option>
+            <option value="rejected" {{ 'selected' if status_filter == 'rejected' }}>Rejected</option>
             <option value="returned" {{ 'selected' if status_filter == 'returned' }}>Returned</option>
         </select>
     </div>
@@ -28,15 +30,9 @@
     <table class="table table-striped align-middle">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Equipment</th>
-                <th>Borrower</th>
-                <th>Qty</th>
-                <th>Borrowed On</th>
-                <th>Due On</th>
-                <th>Returned On</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>#</th><th>Equipment</th><th>Borrower</th><th>Qty</th>
+                <th>Requested</th><th>Issued</th><th>Due</th><th>Returned</th>
+                <th>Status</th><th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -46,7 +42,8 @@
                 <td>{{ b.equipment.name }}</td>
                 <td>{{ b.borrower.name }}</td>
                 <td>{{ b.quantity }}</td>
-                <td>{{ b.borrowed_on.strftime('%Y-%m-%d') }}</td>
+                <td>{{ b.requested_on.strftime('%Y-%m-%d') if b.requested_on else '—' }}</td>
+                <td>{{ b.borrowed_on.strftime('%Y-%m-%d') if b.borrowed_on else '—' }}</td>
                 <td>{{ b.due_on.strftime('%Y-%m-%d') }}</td>
                 <td>{{ b.returned_on.strftime('%Y-%m-%d') if b.returned_on else '—' }}</td>
                 <td>
@@ -54,6 +51,10 @@
                         <span class="badge bg-danger">Overdue</span>
                     {% elif b.status == 'returned' %}
                         <span class="badge bg-success">Returned</span>
+                    {% elif b.status == 'rejected' %}
+                        <span class="badge bg-secondary" title="{{ b.rejection_reason }}">Rejected</span>
+                    {% elif b.status == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
                     {% else %}
                         <span class="badge bg-primary">Borrowed</span>
                     {% endif %}
@@ -67,7 +68,7 @@
                 </td>
             </tr>
             {% else %}
-            <tr><td colspan="9" class="text-center text-muted">No borrowings found.</td></tr>
+            <tr><td colspan="10" class="text-center text-muted">No borrowings found.</td></tr>
             {% endfor %}
         </tbody>
     </table>

@@ -1,34 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Sign Up{% endblock %}
 {% block content %}
-<div class="auth-shell is-mirrored">
-    <div class="panel-promo">
-        <h2>Welcome back</h2>
-        <p>Already have an account? Sign in to pick up where you left off.</p>
-        <a href="{{ url_for('auth.login') }}" class="btn auth-switch">Sign in</a>
-    </div>
-    <div class="panel-form">
-        <h2 class="auth-heading">Create account</h2>
-        <p class="auth-subtext">New accounts are registered as staff.</p>
-        <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Create Borrower Account</h3>
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contact" class="form-label">Contact Number</label>
+                        <input type="text" class="form-control" id="contact" name="contact" placeholder="e.g. 0917 123 4567" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password1" name="password1" placeholder="At least 7 characters" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="password2" name="password2" placeholder="Re-enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                </form>
+                <p class="text-center mt-3 mb-0">
+                    Already have an account? <a href="{{ url_for('auth.login') }}">Login</a>
+                </p>
             </div>
-            <div class="mb-3">
-                <label for="firstName" class="form-label">First name</label>
-                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter your first name" required>
-            </div>
-            <div class="mb-3">
-                <label for="password1" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password1" name="password1" placeholder="At least 7 characters" required>
-            </div>
-            <div class="mb-3">
-                <label for="password2" class="form-label">Confirm password</label>
-                <input type="password" class="form-control" id="password2" name="password2" placeholder="Re-enter your password" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 mt-2">Create account</button>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}

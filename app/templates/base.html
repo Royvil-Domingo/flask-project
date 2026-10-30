@@ -28,12 +28,24 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('equipment.list_equipment') }}">Equipment</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('borrowers.list_borrowers') }}">Borrowers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('borrowings.list_borrowings') }}">Borrowings</a>
-                        </li>
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('borrowers.list_borrowers') }}">Borrowers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('borrowings.pending_requests') }}">Pending Requests</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('borrowings.list_borrowings') }}">Borrowing History</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('borrowings.submit_borrowing') }}">Request Equipment</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('borrowings.my_borrowings') }}">My Borrowings</a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -47,7 +59,7 @@
                             </span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}" onclick="return confirm('Are you sure you want to log out?')">Logout</a>
                         </li>
                     {% else %}
                         <li class="nav-item">

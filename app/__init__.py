@@ -13,7 +13,7 @@ def create_app(config_name=None):
     os.makedirs(app.instance_path, exist_ok=True)
 
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=True)
 
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

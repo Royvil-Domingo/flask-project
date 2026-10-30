@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}New Borrowing{% endblock %}
+{% block title %}Request Equipment{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-7">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h3 class="card-title mb-4">New Borrowing</h3>
+                <h3 class="card-title mb-4">Request Equipment</h3>
                 <form method="POST">
                     <div class="mb-3">
                         <label for="equipment_id" class="form-label">Equipment</label>
@@ -20,18 +20,6 @@
                         {% endif %}
                     </div>
                     <div class="mb-3">
-                        <label for="borrower_id" class="form-label">Borrower</label>
-                        <select class="form-select" id="borrower_id" name="borrower_id" required>
-                            <option value="" disabled selected>Select borrower...</option>
-                            {% for b in borrower_list %}
-                                <option value="{{ b.id }}">{{ b.name }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if not borrower_list %}
-                            <small class="text-danger">No borrowers registered yet. <a href="{{ url_for('borrowers.add_borrower') }}">Add one</a>.</small>
-                        {% endif %}
-                    </div>
-                    <div class="mb-3">
                         <label for="quantity" class="form-label">Quantity</label>
                         <input type="number" min="1" class="form-control" id="quantity" name="quantity" required>
                     </div>
@@ -39,9 +27,10 @@
                         <label for="due_on" class="form-label">Due Date</label>
                         <input type="date" class="form-control" id="due_on" name="due_on" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Record Borrowing</button>
-                    <a href="{{ url_for('borrowings.list_borrowings') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
                 </form>
+                <small class="text-muted d-block mt-3">Your request will stay pending until an admin approves it. Approval does not happen automatically.</small>
             </div>
         </div>
     </div>

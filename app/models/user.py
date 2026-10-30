@@ -11,10 +11,11 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(150), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='staff')
+    role = db.Column(db.String(20), nullable=False, default='borrower')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     processed_borrowings = db.relationship('Borrowing', back_populates='processed_by', lazy=True)
+    borrower_profile = db.relationship('Borrower', back_populates='user', uselist=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
@@ -25,6 +26,10 @@ class User(db.Model, UserMixin):
     @property
     def is_admin(self):
         return self.role == 'admin'
+
+    @property
+    def is_borrower(self):
+        return self.role == 'borrower'
 
     def __repr__(self):
         return f'<User {self.email}>'

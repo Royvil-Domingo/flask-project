@@ -25,5 +25,31 @@ def seed_admin(email, first_name, password):
     click.echo(f'Admin account created for {email}.')
 
 
+@app.cli.command('migrate-data')
+def migrate_data():
+    """One-time data fixup for the borrower workflow. Converts any remaining
+    'staff' users to 'borrower', and creates a linked Borrower profile for any
+    borrower-role user who doesn't already have one. Safe to run more than once."""
+    from app.models.borrower import Borrower
+
+    staff_users = User.query.filter_by(role='staff').all()
+    for user in staff_users:
+        user.role = 'borrower'
+        click.echo(f'Migrated {user.email} from staff to borrower.')
+
+    borrower_role_users = User.query.filter_by(role='borrower').all()
+    for user in borrower_role_users:
+        if user.borrower_profile is None:
+            profile = Borrower(user_id=user.id, name=user.first_name, contact=user.email)
+            db.session.add(profile)
+            click.echo(
+                f'Created a borrower profile for {user.email} '
+                f'(contact defaulted to their email — update it from the Borrowers page if you have a real phone number on file).'
+            )
+
+    db.session.commit()
+    click.echo('Data migration complete.')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
