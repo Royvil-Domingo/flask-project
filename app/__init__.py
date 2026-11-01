@@ -10,7 +10,13 @@ def create_app(config_name=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_by_name[config_name])
 
-    os.makedirs(app.instance_path, exist_ok=True)
+    try:
+        os.makedirs(app.instance_path, exist_ok=True)
+    except OSError:
+        # Read-only filesystem (e.g. Vercel's serverless functions). Safe to
+        # ignore here — the instance folder is only needed for the local
+        # SQLite fallback; a Postgres DATABASE_URL never touches it.
+        pass
 
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
