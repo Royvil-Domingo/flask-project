@@ -14,7 +14,7 @@ There is no public self-registration for admin accounts — the first admin is c
 1. **Clone the repo**
    ```bash
    git clone https://github.com/Royvil-Domingo/flask-project.git
-   cd <repo-name>
+   cd flask-project
    ```
 
 2. **Create and activate a virtual environment**
@@ -78,3 +78,22 @@ There is no public self-registration for admin accounts — the first admin is c
 ## Borrowing workflow
 
 A request starts as `pending` and does not affect available stock. An admin approves it (deducting stock and recording the issue date) or rejects it (stock unchanged). Once borrowed, an admin processes the return, which restores stock. Status values: `pending`, `borrowed`, `rejected`, `returned` — "overdue" is a calculated display state on top of `borrowed`, not a separate status.
+
+## Deployment
+
+The app is deployed on Vercel at `https://flask-project-three-mauve.vercel.app/`, backed by a Postgres database on [Neon](https://neon.tech) — SQLite isn't viable on Vercel since serverless functions have a read-only, ephemeral filesystem.
+
+**One-time production setup** (already done for this deployment, documented here for reference):
+1. Create a Neon Postgres database and copy its connection string.
+2. From a local machine, temporarily point `.env`'s `DATABASE_URL` at that connection string (note the `+psycopg2` driver, required since SQLAlchemy ≥2.1 — see `requirements.txt`) and run:
+   ```bash
+   python -c "from app import create_app; from app.extensions import db; app = create_app(); app.app_context().push(); db.create_all(); print('tables created')"
+   flask db stamp head
+   flask seed-admin
+   ```
+   This builds the schema directly from the models (not by replaying migration history, since the history assumes an already-existing database) and creates the initial admin account.
+3. In Vercel's project settings → Environment Variables, set:
+   - `SECRET_KEY` — a freshly generated value, separate from the local dev one.
+   - `DATABASE_URL` — the same Neon connection string, with `postgresql+psycopg2://` as the scheme.
+
+**Ongoing deploys:** pushing to `main` on GitHub triggers an automatic Vercel redeploy. Vercel does **not** run database migrations on deploy — any future schema change (`flask db migrate`) needs `flask db upgrade` run manually against the Neon database first, the same way local development does, before the code that depends on the new columns goes out.
