@@ -1,4 +1,7 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import (
+    Blueprint, render_template, request, flash,
+    redirect, url_for, current_app
+)
 from flask_login import login_required
 from ..extensions import db
 from ..models.equipment import Equipment
@@ -81,19 +84,50 @@ def edit_equipment(item_id):
 
     return render_template('equipment/form.html', item=item)
 
-
 @equipment.route('/delete/<int:item_id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_equipment(item_id):
     item = Equipment.query.get_or_404(item_id)
 
-    active_borrowings = Borrowing.query.filter_by(equipment_id=item.id, status='borrowed').count()
+    # Prevent deletion if equipment is still physically borrowed.
+    active_borrowings = Borrowing.query.filter_by(
+        equipment_id=item.id,
+        status='borrowed'
+    ).count()
+
     if active_borrowings > 0:
-        flash('Cannot delete equipment with active borrowings.', category='error')
-    else:
+        flash(
+            'Cannot delete equipment that is currently borrowed. '
+            'Process all returns first.',
+            category='error'
+        )
+        return redirect(url_for('equipment.list_equipment'))
+
+    try:
+        # Delete ALL related borrowing history first.
+        # Includes pending, rejected, and returned records.
+        Borrowing.query.filter_by(
+            equipment_id=item.id
+        ).delete(synchronize_session=False)
+
+        # Now the equipment can safely be deleted.
         db.session.delete(item)
         db.session.commit()
-        flash('Equipment deleted.', category='success')
+
+        flash(
+            'Equipment and its borrowing history were permanently deleted.',
+            category='success'
+        )
+
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "Failed to delete equipment ID %s", item_id
+        )
+        flash(
+            'Unable to delete equipment. Please check the application logs.',
+            category='error'
+        )
 
     return redirect(url_for('equipment.list_equipment'))

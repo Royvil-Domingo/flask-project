@@ -33,7 +33,10 @@
                 {% if current_user.is_admin %}
                 <td>
                     <a href="{{ url_for('borrowers.edit_borrower', item_id=item.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <form action="{{ url_for('borrowers.delete_borrower', item_id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this borrower?');">
+                    <form action="{{ url_for('borrowers.delete_borrower', item_id=item.id) }}"
+                    method="POST"
+                    class="d-inline"
+                    onsubmit="return confirm('Permanently delete this borrower, their linked login account, and ALL borrowing history? This cannot be undone.');">
                         <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                     </form>
                 </td>
