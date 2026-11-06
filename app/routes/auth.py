@@ -5,7 +5,11 @@ from ..models.user import User
 from ..models.borrower import Borrower
 
 auth = Blueprint('auth', __name__)
-
+def _safe_next(target):
+    """Only allow same-site relative paths (blocks //evil.com and /\\evil.com)."""
+    if not target or not target.startswith('/') or target.startswith('//') or '\\' in target:
+        return None
+    return target
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -18,19 +22,18 @@ def login():
 
         if not email or not password:
             flash('Email and password are required.', category='error')
-            return render_template('auth/login.html')
+            return render_template('auth/auth.html', active='login')
 
         user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
             login_user(user, remember=True)
             flash(f'Welcome back, {user.first_name}!', category='success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.dashboard'))
+            return redirect(_safe_next(request.args.get('next')) or url_for('main.dashboard'))
         else:
             flash('Incorrect email or password.', category='error')
 
-    return render_template('auth/login.html')
+    return render_template('auth/auth.html', active='login')
 
 
 @auth.route('/logout')
@@ -39,7 +42,6 @@ def logout():
     logout_user()
     flash('You have been logged out.', category='success')
     return redirect(url_for('auth.login'))
-
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -88,4 +90,4 @@ def register():
                 db.session.rollback()
                 flash('An error occurred while creating your account. Please try again.', category='error')
 
-    return render_template('auth/register.html')
+    return render_template('auth/auth.html', active='register')

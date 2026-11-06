@@ -285,70 +285,219 @@ input[type="number"], input[type="date"] { font-family: var(--font-mono); }
 .badge.bg-secondary { background: var(--line-soft) !important; color: var(--ink-soft) !important; border-color: var(--line); }
 
 /* ---------------------------------------------------------------
-   Auth split panel — sign in / create account
-   Two pages (login.html, register.html), each a mirror image of
-   the other, built from the same .auth-shell scaffold so the
-   "switch" between them (see main.js) reads as one motion.
+   Flip auth — single-page sign in / sign up. One amber panel
+   "morphs" between the two halves (position, width and corner
+   radius all animate together, like PowerPoint's Morph), while the
+   forms and panel text cross-fade. Both forms are always in the
+   DOM; only a real submit reloads the page (see main.js).
    --------------------------------------------------------------- */
-.auth-shell {
-  display: flex;
-  flex-wrap: wrap;
-  min-height: 480px;
-  max-width: 880px;
+.flip-auth {
+  --morph-time: 0.8s;
+  --morph-ease: cubic-bezier(0.65, 0, 0.35, 1);   /* ease-in-out, like Morph */
+  --shift: 20%;                                    /* how far forms drift while swapping */
+
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  min-height: 560px;
   margin: 2.5rem auto;
-  background: var(--paper-raised);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
+  background: rgba(247, 243, 231, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 28px;
+  box-shadow: 0 16px 40px rgba(30, 36, 32, 0.18);
   overflow: hidden;
 }
 
-.auth-shell.is-mirrored { flex-direction: row-reverse; }
-
-.auth-shell .panel-form {
-  flex: 1 1 340px;
-  padding: 3rem;
+/* ---- forms: hidden by default, drift + fade in/out ---- */
+.flip-auth__form-container {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transition: opacity 320ms ease, transform 320ms ease;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform var(--morph-time) var(--morph-ease),
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
 }
 
-.auth-shell .panel-promo {
-  flex: 1 1 280px;
-  padding: 3rem 2.5rem;
+.flip-auth__form-container--signin { left: 0;   transform: translateX(calc(var(--shift) * -1)); }
+.flip-auth__form-container--signup { left: 50%; transform: translateX(var(--shift)); }
+
+/* the form that belongs to the current mode */
+.flip-auth:not(.flip-auth--active) .flip-auth__form-container--signin,
+.flip-auth--active .flip-auth__form-container--signup {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+  transition:
+    transform var(--morph-time) var(--morph-ease),
+    opacity 0.45s ease 0.3s,          /* fades in after the panel has uncovered it */
+    visibility 0s linear 0s;
+}
+
+.flip-auth__form {
+  width: 100%;
+  padding: 3rem 3.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.8rem;
+}
+
+.flip-auth__form h1 {
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  margin-bottom: 0.35rem;
+  border-bottom: none;
+  padding-bottom: 0;
+  line-height: 1.05;
+}
+
+.flip-auth__hint {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin-bottom: 0.9rem;
+}
+
+/* ---- the morphing panel ----
+   Anchored with left + right (not transform) so the two edges can
+   travel on slightly different timings. The leading edge moves first
+   and the trailing edge follows 0.14s later, so the panel stretches
+   mid-slide and settles — that's the "morph". Corner radii flip sides
+   at the same time. */
+.flip-auth__toggle-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;                              /* login mode: panel on the right half */
+  right: 0;
+  z-index: 10;
+  overflow: hidden;
+  border-radius: 140px 0 0 140px;
+  transition:
+    right var(--morph-time) var(--morph-ease),
+    left var(--morph-time) var(--morph-ease) 0.14s,
+    border-radius var(--morph-time) var(--morph-ease);
+}
+
+.flip-auth--active .flip-auth__toggle-container {
+  left: 0;                                /* register mode: panel on the left half */
+  right: 50%;
+  border-radius: 0 140px 140px 0;
+  transition:
+    left var(--morph-time) var(--morph-ease),
+    right var(--morph-time) var(--morph-ease) 0.14s,
+    border-radius var(--morph-time) var(--morph-ease);
+}
+
+.flip-auth__toggle {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(155deg, var(--amber) 0%, var(--amber-hover) 100%);
-  transition: opacity 320ms ease, flex-basis 420ms ease;
 }
 
-.auth-heading { border-bottom: none; margin-bottom: 0.25rem; padding-bottom: 0; font-size: 2.25rem; }
-.auth-subtext { color: var(--ink-soft); margin-bottom: 1.75rem; }
+/* ---- panel text: both blocks stacked, cross-fade ---- */
+.flip-auth__toggle-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 2.2rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0s linear 0.25s;
+}
 
-.panel-promo h2 { color: var(--ink); font-size: 2rem; margin-bottom: 0.75rem; }
-.panel-promo p { color: var(--amber-ink); margin-bottom: 1.75rem; max-width: 34ch; }
+/* login mode shows "Hello There / Sign Up"; register mode shows "Welcome Back / Sign In" */
+.flip-auth:not(.flip-auth--active) .flip-auth__toggle-panel--right,
+.flip-auth--active .flip-auth__toggle-panel--left {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity 0.4s ease 0.35s,
+    transform 0.4s ease 0.35s,
+    visibility 0s linear 0s;
+}
 
-.auth-switch {
-  align-self: flex-start;
+.flip-auth__toggle-panel h1 {
+  color: var(--ink);
+  border-bottom: none;
+  padding-bottom: 0;
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  line-height: 1.05;
+}
+
+.flip-auth__toggle-panel p {
+  color: var(--amber-ink);
+  margin: 0.9rem 0 1.6rem;
+  max-width: 28ch;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.flip-auth__ghost-btn {
+  background: transparent;
   border: 2px solid var(--ink);
   color: var(--ink);
-  background: transparent;
+  border-radius: 999px;
+  padding: 0.7rem 2.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
-.auth-switch:hover { background: var(--ink); border-color: var(--ink); color: var(--paper-raised); }
+.flip-auth__ghost-btn:hover {
+  background: var(--ink);
+  color: var(--paper-raised);
+  transform: translateY(-1px);
+}
 
-/* the "curtain" transition main.js triggers just before navigating
-   to the other auth page */
-.auth-shell.is-transitioning .panel-form { opacity: 0; transform: scale(0.98); }
-.auth-shell.is-transitioning .panel-promo { flex-basis: 100%; }
-
+/* ---- phones: forms on top, a fixed amber strip below. The strip
+   stays put; only the forms and the strip text swap. ---- */
 @media (max-width: 620px) {
-  .auth-shell { margin: 1.25rem; min-height: 0; }
-  .auth-shell, .auth-shell.is-mirrored { flex-direction: column; }
-  .auth-shell .panel-form, .auth-shell .panel-promo { padding: 2rem 1.5rem; }
-}
+  .flip-auth {
+    --shift: 8%;
+    min-height: 780px;
+    border-radius: 18px;
+  }
 
+  .flip-auth__form-container--signin,
+  .flip-auth__form-container--signup {
+    left: 0;
+    width: 100%;
+    height: calc(100% - 190px);
+  }
+
+  .flip-auth__form { padding: 2rem 1.5rem; }
+
+  .flip-auth__toggle-container,
+  .flip-auth--active .flip-auth__toggle-container {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 190px;
+    border-radius: 90px 90px 0 0;
+    transition: none;
+  }
+
+  .flip-auth__toggle-panel { padding: 0 1.25rem; }
+  .flip-auth__toggle-panel h1 { font-size: 1.9rem; margin-bottom: 1rem; }
+  .flip-auth__toggle-panel p { display: none; }
+}
 /* ---------------------------------------------------------------
    Misc
    --------------------------------------------------------------- */
