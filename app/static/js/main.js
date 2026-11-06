@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   autoDismissAlerts();
   markScrollableTables();
   guardBorrowQuantity();
-  enhanceAuthSwitch();
+  initAuthToggle();
 });
 
 /* Due date can't be set before today. */
@@ -95,145 +95,39 @@ function guardBorrowQuantity() {
   quantityInput.addEventListener('input', check);
 }
 
-/* On the split sign-in / create-account pages, play a short
-   "curtain" transition before following the link to the other
-   page, so switching between /login and /register reads as one
-   motion rather than a flat page swap. Skipped entirely when the
-   visitor prefers reduced motion — the link just navigates as normal. */
-function enhanceAuthSwitch() {
-  const shell = document.querySelector('.auth-shell');
-  const switchLink = shell ? shell.querySelector('.auth-switch') : null;
-  if (!shell || !switchLink) return;
+/* On the sign-in/sign-up page, toggle the flip-auth--active class to
+   slide the overlay panel and swap which form is visible. Both forms
+   are already in the DOM — this never navigates; only an actual
+   submit does. */
+function applyAuthMode(container, mode) {
+  const isRegister = mode === 'register';
+  container.classList.toggle('flip-auth--active', isRegister);
+  container.dataset.mode = mode;
 
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReducedMotion) return;
+  const toLogin = document.getElementById('flipToLogin');
+  const toRegister = document.getElementById('flipToRegister');
 
-  switchLink.addEventListener('click', (event) => {
-    if (shell.classList.contains('is-transitioning')) return;
-    event.preventDefault();
-    shell.classList.add('is-transitioning');
-    const destination = switchLink.href;
-    setTimeout(() => {
-      window.location.href = destination;
-    }, 380);
-  });
-}/* ============================================================
-Equipment Borrowing & Return System — interaction layer
-Progressive enhancement only: works against the markup the
-Jinja templates already render, no template changes needed.
-============================================================ */
-
-document.addEventListener('DOMContentLoaded', () => {
-guardDueDateMin();
-autoDismissAlerts();
-markScrollableTables();
-guardBorrowQuantity();
-enhanceAuthSwitch();
-});
-
-/* Due date can't be set before today. */
-function guardDueDateMin() {
-const today = new Date().toISOString().split('T')[0];
-const dueInput = document.getElementById('due_on');
-if (dueInput) {
- dueInput.setAttribute('min', today);
-}
+  if (toLogin) {
+   toLogin.setAttribute('aria-pressed', String(!isRegister));
+  }
+  if (toRegister) {
+   toRegister.setAttribute('aria-pressed', String(isRegister));
+  }
 }
 
-/* Auto-dismiss flash messages after a pause. Uses Bootstrap's own
-Alert API when available so the element is actually removed from
-the DOM afterward, not just left invisible taking up space. */
-function autoDismissAlerts() {
-const alerts = document.querySelectorAll('.alert');
-alerts.forEach((alert, index) => {
- setTimeout(() => {
-   if (!document.body.contains(alert)) return;
-   if (window.bootstrap && window.bootstrap.Alert) {
-     window.bootstrap.Alert.getOrCreateInstance(alert).close();
-   } else {
-     alert.classList.add('is-dismissing');
-     setTimeout(() => alert.remove(), 220);
-   }
- }, 5000 + index * 150);
-});
-}
+function initAuthToggle() {
+  const container = document.getElementById('authContainer');
+  if (!container) return;
 
-/* Adds a right-edge fade indicator on tables that overflow
-horizontally, so a scrollable table doesn't look cut off on
-narrow screens. Re-checks on scroll and on resize. */
-function markScrollableTables() {
-const wrappers = document.querySelectorAll('.table-responsive');
-wrappers.forEach((wrapper) => {
- const update = () => {
-   const overflowing = wrapper.scrollWidth > wrapper.clientWidth + 1;
-   const atEnd = wrapper.scrollLeft + wrapper.clientWidth >= wrapper.scrollWidth - 1;
-   wrapper.classList.toggle('has-scroll', overflowing && !atEnd);
- };
- update();
- wrapper.addEventListener('scroll', update);
- window.addEventListener('resize', update);
-});
-}
+  const toLogin = document.getElementById('flipToLogin');
+  const toRegister = document.getElementById('flipToRegister');
 
-/* On the "new borrowing" form, read the available-quantity figure
-straight out of the equipment dropdown's own option text
-(e.g. "Hammer (4 available)") and warn before submit if the
-requested quantity would exceed it. Mirrors the server-side rule
-in borrowings.py — doesn't replace it, the server still validates. */
-function guardBorrowQuantity() {
-const equipmentSelect = document.getElementById('equipment_id');
-const quantityInput = document.getElementById('quantity');
-if (!equipmentSelect || !quantityInput) return;
+  applyAuthMode(container, container.dataset.mode || 'login');
 
-const warning = document.createElement('small');
-warning.className = 'text-danger d-block mt-1';
-warning.style.display = 'none';
-quantityInput.insertAdjacentElement('afterend', warning);
-
-const availableFor = (option) => {
- const match = option ? option.textContent.match(/\((\d+)\s+available\)/) : null;
- return match ? parseInt(match[1], 10) : null;
-};
-
-const check = () => {
- const option = equipmentSelect.options[equipmentSelect.selectedIndex];
- const available = availableFor(option);
- const requested = parseInt(quantityInput.value, 10);
-
- if (available !== null && requested > available) {
-   warning.textContent = `Only ${available} unit(s) available.`;
-   warning.style.display = 'block';
-   quantityInput.setCustomValidity('Quantity exceeds available units.');
- } else {
-   warning.style.display = 'none';
-   quantityInput.setCustomValidity('');
- }
-};
-
-equipmentSelect.addEventListener('change', check);
-quantityInput.addEventListener('input', check);
-}
-
-/* On the split sign-in / create-account pages, play a short
-"curtain" transition before following the link to the other
-page, so switching between /login and /register reads as one
-motion rather than a flat page swap. Skipped entirely when the
-visitor prefers reduced motion — the link just navigates as normal. */
-function enhanceAuthSwitch() {
-const shell = document.querySelector('.auth-shell');
-const switchLink = shell ? shell.querySelector('.auth-switch') : null;
-if (!shell || !switchLink) return;
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (prefersReducedMotion) return;
-
-switchLink.addEventListener('click', (event) => {
- if (shell.classList.contains('is-transitioning')) return;
- event.preventDefault();
- shell.classList.add('is-transitioning');
- const destination = switchLink.href;
- setTimeout(() => {
-   window.location.href = destination;
- }, 380);
-});
+  if (toRegister) {
+   toRegister.addEventListener('click', () => applyAuthMode(container, 'register'));
+  }
+  if (toLogin) {
+   toLogin.addEventListener('click', () => applyAuthMode(container, 'login'));
+  }
 }

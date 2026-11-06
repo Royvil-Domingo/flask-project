@@ -285,68 +285,248 @@ input[type="number"], input[type="date"] { font-family: var(--font-mono); }
 .badge.bg-secondary { background: var(--line-soft) !important; color: var(--ink-soft) !important; border-color: var(--line); }
 
 /* ---------------------------------------------------------------
-   Auth split panel — sign in / create account
-   Two pages (login.html, register.html), each a mirror image of
-   the other, built from the same .auth-shell scaffold so the
-   "switch" between them (see main.js) reads as one motion.
+   Flip auth — single-page sign in / sign up with a sliding,
+   glass-look overlay panel, toggled client-side (see main.js).
+   Both forms exist in the DOM at once; only an actual submit
+   reloads the page.
    --------------------------------------------------------------- */
-.auth-shell {
-  display: flex;
-  flex-wrap: wrap;
-  min-height: 480px;
-  max-width: 880px;
+.flip-auth {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  min-height: 560px;
   margin: 2.5rem auto;
-  background: var(--paper-raised);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
+  background: rgba(247, 243, 231, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 28px;
+  box-shadow: 0 16px 40px rgba(30, 36, 32, 0.18);
   overflow: hidden;
 }
 
-.auth-shell.is-mirrored { flex-direction: row-reverse; }
-
-.auth-shell .panel-form {
-  flex: 1 1 340px;
-  padding: 3rem;
+.flip-auth__form-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transition: opacity 320ms ease, transform 320ms ease;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, visibility 0.45s ease;
+}
+ 
+.flip-auth__form-container--signin {
+  left: 0;
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+ 
+.flip-auth__form-container--signup {
+  left: 50%;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(0);
+}
+ 
+.flip-auth--active .flip-auth__form-container--signin {
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-100%);
+  z-index: 1;
+}
+ 
+.flip-auth--active .flip-auth__form-container--signup {
+  left: 50%;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+  z-index: 3;
 }
 
-.auth-shell .panel-promo {
-  flex: 1 1 280px;
-  padding: 3rem 2.5rem;
+.flip-auth__form {
+  width: 100%;
+  padding: 3rem 3.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.8rem;
+}
+
+.flip-auth__form h1 {
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  margin-bottom: 0.35rem;
+  border-bottom: none;
+  padding-bottom: 0;
+  line-height: 1.05;
+}
+
+.flip-auth__hint {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin-bottom: 0.9rem;
+}
+
+.flip-auth__toggle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.75s ease;
+  border-radius: 140px 0 0 140px;
+  z-index: 10;
+}
+
+.flip-auth--active .flip-auth__toggle-container {
+  left: auto;
+  right: 0;
+  border-radius: 0 140px 140px 0;
+}
+
+.flip-auth__toggle {
   background: linear-gradient(155deg, var(--amber) 0%, var(--amber-hover) 100%);
-  transition: opacity 320ms ease, flex-basis 420ms ease;
+  height: 100%;
+  width: 200%;
+  position: relative;
+  left: 0;
+  transform: translateX(0);
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.auth-heading { border-bottom: none; margin-bottom: 0.25rem; padding-bottom: 0; font-size: 2.25rem; }
-.auth-subtext { color: var(--ink-soft); margin-bottom: 1.75rem; }
+.flip-auth--active .flip-auth__toggle {
+  transform: translateX(-50%);
+}
 
-.panel-promo h2 { color: var(--ink); font-size: 2rem; margin-bottom: 0.75rem; }
-.panel-promo p { color: var(--amber-ink); margin-bottom: 1.75rem; max-width: 34ch; }
+.flip-auth__toggle-panel {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 2.2rem;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+}
 
-.auth-switch {
-  align-self: flex-start;
+.flip-auth__toggle-panel h1 {
+  color: var(--ink);
+  border-bottom: none;
+  padding-bottom: 0;
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  line-height: 1.05;
+}
+
+.flip-auth__toggle-panel p {
+  color: var(--amber-ink);
+  margin: 0.9rem 0 1.6rem;
+  max-width: 28ch;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.flip-auth__toggle-panel--left {
+  left: 0;
+  transform: translateX(0);
+}
+
+.flip-auth__toggle-panel--right {
+  right: 0;
+  transform: translateX(100%);
+}
+
+.flip-auth--active .flip-auth__toggle-panel--left {
+  transform: translateX(-100%);
+}
+
+.flip-auth--active .flip-auth__toggle-panel--right {
+  transform: translateX(0);
+}
+
+.flip-auth__ghost-btn {
+  background: transparent;
   border: 2px solid var(--ink);
   color: var(--ink);
-  background: transparent;
+  border-radius: 999px;
+  padding: 0.7rem 2.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
-.auth-switch:hover { background: var(--ink); border-color: var(--ink); color: var(--paper-raised); }
-
-/* the "curtain" transition main.js triggers just before navigating
-   to the other auth page */
-.auth-shell.is-transitioning .panel-form { opacity: 0; transform: scale(0.98); }
-.auth-shell.is-transitioning .panel-promo { flex-basis: 100%; }
+.flip-auth__ghost-btn:hover {
+  background: var(--ink);
+  color: var(--paper-raised);
+  transform: translateY(-1px);
+}
 
 @media (max-width: 620px) {
-  .auth-shell { margin: 1.25rem; min-height: 0; }
-  .auth-shell, .auth-shell.is-mirrored { flex-direction: column; }
-  .auth-shell .panel-form, .auth-shell .panel-promo { padding: 2rem 1.5rem; }
+  .flip-auth {
+     min-height: 680px;
+     border-radius: 18px;
+  }
+
+  .flip-auth__form-container {
+     width: 100%;
+     height: 58%;
+     top: 0;
+  }
+
+  .flip-auth__toggle-container {
+     top: auto;
+     bottom: 0;
+     left: 0;
+     width: 100%;
+     height: 42%;
+     border-radius: 120px 120px 0 0;
+  }
+
+  .flip-auth--active .flip-auth__toggle-container {
+     border-radius: 120px 120px 0 0;
+  }
+
+  .flip-auth__form {
+     padding: 2rem 1.5rem;
+  }
+
+  .flip-auth__toggle {
+     width: 100%;
+     left: 0;
+     transform: none;
+  }
+
+  .flip-auth--active .flip-auth__toggle {
+     transform: none;
+  }
+
+  .flip-auth__toggle-panel {
+     width: 100%;
+     padding: 0 1.25rem;
+  }
+
+  .flip-auth__toggle-panel--left,
+  .flip-auth__toggle-panel--right {
+     transform: none;
+  }
+
+  .flip-auth--active .flip-auth__toggle-panel--left,
+  .flip-auth--active .flip-auth__toggle-panel--right {
+     transform: none;
+  }
 }
 
 /* ---------------------------------------------------------------

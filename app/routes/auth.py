@@ -18,7 +18,7 @@ def login():
 
         if not email or not password:
             flash('Email and password are required.', category='error')
-            return render_template('auth/login.html')
+            return render_template('auth/auth.html', active='login')
 
         user = User.query.filter_by(email=email).first()
 
@@ -30,7 +30,7 @@ def login():
         else:
             flash('Incorrect email or password.', category='error')
 
-    return render_template('auth/login.html')
+    return render_template('auth/auth.html', active='login')
 
 
 @auth.route('/logout')
@@ -38,7 +38,7 @@ def login():
 def logout():
     logout_user()
     flash('You have been logged out.', category='success')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('auth.login', active='login'))
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -88,4 +88,4 @@ def register():
                 db.session.rollback()
                 flash('An error occurred while creating your account. Please try again.', category='error')
 
-    return render_template('auth/register.html')
+    return render_template('auth/auth.html', active='register')
