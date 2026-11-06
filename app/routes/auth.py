@@ -5,7 +5,11 @@ from ..models.user import User
 from ..models.borrower import Borrower
 
 auth = Blueprint('auth', __name__)
-
+def _safe_next(target):
+    """Only allow same-site relative paths (blocks //evil.com and /\\evil.com)."""
+    if not target or not target.startswith('/') or target.startswith('//') or '\\' in target:
+        return None
+    return target
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -25,8 +29,7 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=True)
             flash(f'Welcome back, {user.first_name}!', category='success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.dashboard'))
+            return redirect(_safe_next(request.args.get('next')) or url_for('main.dashboard'))
         else:
             flash('Incorrect email or password.', category='error')
 
@@ -38,8 +41,7 @@ def login():
 def logout():
     logout_user()
     flash('You have been logged out.', category='success')
-    return redirect(url_for('auth.login', active='login'))
-
+    return redirect(url_for('auth.login'))
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():

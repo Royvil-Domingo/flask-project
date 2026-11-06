@@ -4,8 +4,7 @@
 <div class="flip-auth{{ ' flip-auth--active' if active == 'register' else '' }}" id="authContainer" data-mode="{{ active }}">
 
     <div class="flip-auth__form-container flip-auth__form-container--signup">
-        <form method="POST" action="{{ url_for('auth.register') }}" class="flip-auth__form">
-            <h1>Sign Up</h1>
+        <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" class="flip-auth__form">            <h1>Sign Up</h1>
             <p class="flip-auth__hint">Registers a borrower account.</p>
 
             <label class="visually-hidden" for="reg-email">Email</label>

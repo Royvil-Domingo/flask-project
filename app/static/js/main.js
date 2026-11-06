@@ -95,39 +95,39 @@ function guardBorrowQuantity() {
   quantityInput.addEventListener('input', check);
 }
 
-/* On the sign-in/sign-up page, toggle the flip-auth--active class to
-   slide the overlay panel and swap which form is visible. Both forms
-   are already in the DOM — this never navigates; only an actual
-   submit does. */
-function applyAuthMode(container, mode) {
-  const isRegister = mode === 'register';
-  container.classList.toggle('flip-auth--active', isRegister);
-  container.dataset.mode = mode;
-
-  const toLogin = document.getElementById('flipToLogin');
-  const toRegister = document.getElementById('flipToRegister');
-
-  if (toLogin) {
-   toLogin.setAttribute('aria-pressed', String(!isRegister));
-  }
-  if (toRegister) {
-   toRegister.setAttribute('aria-pressed', String(isRegister));
-  }
-}
-
+/* On the sign-in/sign-up page, flip the container's mode class and let
+   the CSS morph the panel. Both forms are already in the DOM, so this
+   never navigates; only a real submit does. */
 function initAuthToggle() {
   const container = document.getElementById('authContainer');
   if (!container) return;
 
   const toLogin = document.getElementById('flipToLogin');
   const toRegister = document.getElementById('flipToRegister');
+  const signinForm = container.querySelector('.flip-auth__form-container--signin form');
+  const signupForm = container.querySelector('.flip-auth__form-container--signup form');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  applyAuthMode(container, container.dataset.mode || 'login');
+  const setMode = (mode) => {
+    if (container.dataset.mode === mode) return;
 
-  if (toRegister) {
-   toRegister.addEventListener('click', () => applyAuthMode(container, 'register'));
-  }
-  if (toLogin) {
-   toLogin.addEventListener('click', () => applyAuthMode(container, 'login'));
-  }
+    const isRegister = mode === 'register';
+    const form = isRegister ? signupForm : signinForm;
+
+    container.classList.toggle('flip-auth--active', isRegister);
+    container.dataset.mode = mode;
+    document.title = isRegister ? 'Sign Up' : 'Sign In';
+
+    // keep the address bar honest (refresh lands on the same side)
+    history.replaceState({ mode }, '', form.getAttribute('action'));
+
+    // move the cursor into the form that just appeared, after the morph
+    setTimeout(() => {
+      const first = form.querySelector('input');
+      if (first) first.focus({ preventScroll: true });
+    }, reduceMotion.matches ? 0 : 450);
+  };
+
+  if (toRegister) toRegister.addEventListener('click', () => setMode('register'));
+  if (toLogin) toLogin.addEventListener('click', () => setMode('login'));
 }
