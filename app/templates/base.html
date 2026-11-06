@@ -63,12 +63,12 @@
                             <a class="nav-link" href="{{ url_for('auth.logout') }}" onclick="return confirm('Are you sure you want to log out?')">Logout</a>
                         </li>
                     {% else %}
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.register') }}">Sign Up</a>
-                        </li>
+                        </li> -->
                     {% endif %}
                 </ul>
             </div>
