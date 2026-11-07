@@ -39,12 +39,20 @@
 
 * { box-sizing: border-box; }
 
-html, body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 16px;
+body {
+  font-family: 'Poppins', sans-serif;
+  background-image:
+      linear-gradient(rgba(3, 26, 66, 0.20), rgba(3, 26, 66, 0.20)),
+      url('/static/images/usagibg.jpg');
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
+
+
 
 /* one orchestrated load-in, not per-element */
 body { animation: page-in 320ms ease-out both; }
@@ -192,6 +200,18 @@ a:hover { color: var(--ink); }
 
 .btn-outline-success { border-color: var(--moss); color: var(--moss); }
 .btn-outline-success:hover { background: var(--moss); border-color: var(--moss); color: #fff; }
+
+.btn-outline-dark {
+  background-color: #f0b632;
+  color: #172033;
+  border-color: #f0b632;
+}
+
+.btn-outline-dark:hover {
+  background-color: #d99e22;
+  color: #172033;
+  border-color: #d99e22;
+}
 
 .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
 
