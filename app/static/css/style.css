@@ -524,3 +524,15 @@ input[type="number"], input[type="date"] { font-family: var(--font-mono); }
 .text-muted { color: var(--ink-soft) !important; }
 
 small.text-danger { font-family: var(--font-body); font-size: 0.8rem; }
+
+/* Semi-transparent content background */
+.content-glass {
+    background: rgba(244, 239, 233, .85);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
