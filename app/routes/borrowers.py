@@ -76,64 +76,36 @@ def edit_borrower(item_id):
 def delete_borrower(item_id):
     item = Borrower.query.get_or_404(item_id)
 
-    # Check whether the borrower still has equipment.
-    active_borrowings = Borrowing.query.filter_by(
-        borrower_id=item.id,
-        status='borrowed'
-    ).count()
-
-    if active_borrowings > 0:
+    history_count = Borrowing.query.filter_by(borrower_id=item.id).count()
+    if history_count > 0:
         flash(
-            'Cannot delete this borrower because they still '
-            'have equipment that has not been returned.',
+            f'Cannot delete "{item.name}": they have {history_count} borrowing record(s) '
+            'in the history. Records are kept for the audit trail.',
             category='error'
         )
         return redirect(url_for('borrowers.list_borrowers'))
 
-    # Get the login account linked to this borrower.
     linked_user = item.user
 
     try:
-        # Delete all borrowing records belonging to this borrower.
-        # This includes pending, rejected, and returned records.
-        Borrowing.query.filter_by(
-            borrower_id=item.id
-        ).delete(synchronize_session=False)
-
-        # If the linked user processed other borrowing records,
-        # remove those references before deleting the account.
         if linked_user:
-            Borrowing.query.filter_by(
-                processed_by_id=linked_user.id
-            ).update(
-                {Borrowing.processed_by_id: None},
-                synchronize_session=False
+            # Legacy records may reference this account as the processing user.
+            Borrowing.query.filter_by(processed_by_id=linked_user.id).update(
+                {Borrowing.processed_by_id: None}, synchronize_session=False
             )
 
-        # Delete the borrower profile first.
         db.session.delete(item)
         db.session.flush()
 
-        # Delete its associated normal login account.
+        # Remove the linked normal login account too (never an admin).
         if linked_user and linked_user.role != 'admin':
             db.session.delete(linked_user)
 
         db.session.commit()
-
-        flash(
-            'Borrower account, profile, and borrowing history '
-            'were permanently deleted.',
-            category='success'
-        )
-
+        flash('Borrower deleted.', category='success')
     except Exception:
         db.session.rollback()
-        current_app.logger.exception(
-            "Failed to delete borrower ID %s", item_id
-        )
-        flash(
-            'Unable to delete borrower. Please check the application logs.',
-            category='error'
-        )
+        current_app.logger.exception("Failed to delete borrower ID %s", item_id)
+        flash('Unable to delete borrower. Please try again.', category='error')
 
     return redirect(url_for('borrowers.list_borrowers'))

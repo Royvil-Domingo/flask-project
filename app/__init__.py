@@ -1,25 +1,37 @@
 import os
-from flask import Flask, render_template
-from .extensions import db, login_manager, migrate
+from flask import Flask, render_template, flash, redirect, url_for
+from flask_login import current_user
+from flask_wtf.csrf import CSRFError
+from .extensions import db, login_manager, migrate, csrf
 from config import config_by_name
 
 
 def create_app(config_name=None):
-    config_name = config_name or os.environ.get('FLASK_ENV', 'development')
+    # Defaults to production so a deployment that forgets FLASK_ENV never
+    # runs with DEBUG on. Local development sets FLASK_ENV=development in .env.
+    config_name = config_name or os.environ.get('FLASK_ENV', 'production')
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_by_name[config_name])
+    app.config.setdefault('WTF_CSRF_TIME_LIMIT', None)  # token lasts as long as the session
+
+    if config_name == 'production' and app.config['SECRET_KEY'] == 'change-this-secret-key':
+        raise RuntimeError(
+            'SECRET_KEY is not set. Add it to your .env file (local) or to the '
+            'environment variables of your hosting platform.'
+        )
 
     try:
         os.makedirs(app.instance_path, exist_ok=True)
     except OSError:
         # Read-only filesystem (e.g. Vercel's serverless functions). Safe to
-        # ignore here — the instance folder is only needed for the local
+        # ignore here: the instance folder is only needed for the local
         # SQLite fallback; a Postgres DATABASE_URL never touches it.
         pass
 
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
+    csrf.init_app(app)
 
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -53,6 +65,11 @@ def create_app(config_name=None):
 
 
 def register_error_handlers(app):
+    @app.errorhandler(CSRFError)
+    def csrf_error(e):
+        flash('Your session expired or the form was invalid. Please try again.', category='error')
+        return redirect(url_for('main.dashboard') if current_user.is_authenticated else url_for('auth.login'))
+
     @app.errorhandler(400)
     def bad_request(e):
         return render_template('errors/400.html'), 400

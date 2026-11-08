@@ -6,7 +6,8 @@
     <div class="flip-auth__form-container flip-auth__form-container--signup">
         <form method="POST"
                 action="{{ url_for('auth.register') }}"
-                class="flip-auth__form">           
+                class="flip-auth__form">   
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">        
       <h1>Sign Up</h1>
             <p class="flip-auth__hint">Registers a borrower account.</p>
 
@@ -31,6 +32,7 @@
 
     <div class="flip-auth__form-container flip-auth__form-container--signin">
         <form method="POST" action="{{ url_for('auth.login') }}" class="flip-auth__form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <h1>Sign In</h1>
             <p class="flip-auth__hint">Use your account email and password.</p>
 

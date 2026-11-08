@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Edit' if item else 'Add' }} Equipment{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
+<div class="row">
+    <div class="col-12">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h3 class="card-title mb-4">{{ 'Edit' if item else 'Register' }} Equipment</h3>
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="name" value="{{ item.name if item else '' }}" required>

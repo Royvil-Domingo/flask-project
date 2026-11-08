@@ -3,6 +3,11 @@ from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from ..models.equipment import Equipment
 from ..models.borrowing import Borrowing
+from ..utils.decorators import admin_required
+from ..utils.sql_reports import (
+    OVERDUE_SQL, AVAILABILITY_SQL, STATUS_SQL,
+    get_overdue_report, get_availability_report, get_status_summary,
+)
 
 main = Blueprint('main', __name__)
 
@@ -56,4 +61,19 @@ def dashboard():
         my_active=my_active,
         my_overdue=my_overdue,
         my_recent=my_recent
+    )
+
+
+@main.route('/reports')
+@login_required
+@admin_required
+def reports():
+    return render_template(
+        'main/reports.html',
+        overdue=get_overdue_report(),
+        availability=get_availability_report(),
+        status_summary=get_status_summary(),
+        overdue_sql=OVERDUE_SQL,
+        availability_sql=AVAILABILITY_SQL,
+        status_sql=STATUS_SQL,
     )

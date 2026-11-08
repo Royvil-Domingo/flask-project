@@ -43,9 +43,8 @@
                 {% if current_user.is_admin %}
                 <td>
                     <a href="{{ url_for('equipment.edit_equipment', item_id=item.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <form action="{{ url_for('equipment.delete_equipment', item_id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm(
-                        'Permanently delete this equipment and ALL associated borrowing history? This cannot be undone.'
-                    );">
+                    <form action="{{ url_for('equipment.delete_equipment', item_id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this equipment? This cannot be undone.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                     </form>
                 </td>

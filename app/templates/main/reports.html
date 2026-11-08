@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h2 class="mb-2">Reports</h2>
+<p class="text-muted mb-4">
+    Each report is produced by a hand-written SQL query that Flask runs against the database
+    with bound parameters. Expand "View the SQL" to see the exact statement.
+</p>
+
+<h5>Overdue items</h5>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr><th>#</th><th>Equipment</th><th>Borrower</th><th>Contact</th><th>Qty</th><th>Due</th><th>Days overdue</th></tr>
+        </thead>
+        <tbody>
+            {% for r in overdue %}
+            <tr>
+                <td>{{ r.borrowing_id }}</td>
+                <td>{{ r.equipment }}</td>
+                <td>{{ r.borrower }}</td>
+                <td>{{ r.contact }}</td>
+                <td>{{ r.quantity }}</td>
+                <td>{{ r.due_on.strftime('%Y-%m-%d') }}</td>
+                <td><span class="badge bg-danger">{{ r.days_overdue }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted">No overdue items.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<details class="mb-5">
+    <summary>View the SQL</summary>
+    <pre class="p-3 bg-light border mt-2">{{ overdue_sql }}</pre>
+</details>
+
+<h5>Equipment availability</h5>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr><th>Equipment</th><th>Total</th><th>Available</th><th>Borrowed</th><th>Pending requests (units)</th></tr>
+        </thead>
+        <tbody>
+            {% for r in availability %}
+            <tr>
+                <td>{{ r.equipment }}</td>
+                <td>{{ r.total_quantity }}</td>
+                <td>{{ r.available_quantity }}</td>
+                <td>{{ r.borrowed_quantity }}</td>
+                <td>{{ r.pending_quantity }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted">No equipment registered.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<details class="mb-5">
+    <summary>View the SQL</summary>
+    <pre class="p-3 bg-light border mt-2">{{ availability_sql }}</pre>
+</details>
+
+<h5>Borrowing records by status</h5>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr><th>Status</th><th>Records</th><th>Total units</th></tr>
+        </thead>
+        <tbody>
+            {% for r in status_summary %}
+            <tr>
+                <td>{{ r.status }}</td>
+                <td>{{ r.total_records }}</td>
+                <td>{{ r.total_units }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted">No borrowing records yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<details class="mb-4">
+    <summary>View the SQL</summary>
+    <pre class="p-3 bg-light border mt-2">{{ status_sql }}</pre>
+</details>
+{% endblock %}

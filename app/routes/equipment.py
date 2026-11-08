@@ -90,44 +90,22 @@ def edit_equipment(item_id):
 def delete_equipment(item_id):
     item = Equipment.query.get_or_404(item_id)
 
-    # Prevent deletion if equipment is still physically borrowed.
-    active_borrowings = Borrowing.query.filter_by(
-        equipment_id=item.id,
-        status='borrowed'
-    ).count()
-
-    if active_borrowings > 0:
+    history_count = Borrowing.query.filter_by(equipment_id=item.id).count()
+    if history_count > 0:
         flash(
-            'Cannot delete equipment that is currently borrowed. '
-            'Process all returns first.',
+            f'Cannot delete "{item.name}": it has {history_count} borrowing record(s) '
+            'in the history. Records are kept for the audit trail.',
             category='error'
         )
         return redirect(url_for('equipment.list_equipment'))
 
     try:
-        # Delete ALL related borrowing history first.
-        # Includes pending, rejected, and returned records.
-        Borrowing.query.filter_by(
-            equipment_id=item.id
-        ).delete(synchronize_session=False)
-
-        # Now the equipment can safely be deleted.
         db.session.delete(item)
         db.session.commit()
-
-        flash(
-            'Equipment and its borrowing history were permanently deleted.',
-            category='success'
-        )
-
+        flash('Equipment deleted.', category='success')
     except Exception:
         db.session.rollback()
-        current_app.logger.exception(
-            "Failed to delete equipment ID %s", item_id
-        )
-        flash(
-            'Unable to delete equipment. Please check the application logs.',
-            category='error'
-        )
+        current_app.logger.exception("Failed to delete equipment ID %s", item_id)
+        flash('Unable to delete equipment. Please try again.', category='error')
 
     return redirect(url_for('equipment.list_equipment'))
