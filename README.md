@@ -1,12 +1,14 @@
 # Equipment Borrowing and Return System
 
-**Group 3**: Group members: _(Group Members:
+**Group 3**
+
+Group Members:
 1. Domingo, Royvil
 2. Galvez, Rainiel
 3. Naga, Chelzy Mariz
 4. Nicolas, Clarence Dave
 5. Perez, Mark Paler
-6. Timoteo, Jimuel Josh)_
+6. Timoteo, Jimuel Josh
 
 A Flask web app for tracking equipment availability, borrower requests, and admin-approved borrowing transactions.
 
