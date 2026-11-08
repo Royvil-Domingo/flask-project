@@ -62,6 +62,7 @@
                 <td>
                     {% if b.status == 'borrowed' %}
                     <form action="{{ url_for('borrowings.return_borrowing', borrowing_id=b.id) }}" method="POST" onsubmit="return confirm('Mark this as returned?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-sm btn-outline-success">Mark Returned</button>
                     </form>
                     {% endif %}

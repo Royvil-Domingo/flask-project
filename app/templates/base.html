@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/usagi.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/usagi.png') }}">
     <title>{% block title %}BorrowIT{% endblock %}</title>
     <link
         rel="stylesheet"
@@ -16,7 +16,7 @@
         <div class="container">
             
             <a class="navbar-brand" href="{{ url_for('main.dashboard') if current_user.is_authenticated else url_for('auth.login') }}">
-                <img src="../static/images/usagi.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">BorrowIT
+                <img src="{{ url_for('static', filename='images/usagi.png') }}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">BorrowIT
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -40,6 +40,9 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('borrowings.list_borrowings') }}">Borrowing History</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('main.reports') }}">Reports</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
