@@ -36,12 +36,15 @@ def login():
     return render_template('auth/auth.html', active='login')
 
 
-@auth.route('/logout')
+@auth.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
-    logout_user()
-    flash('You have been logged out.', category='success')
-    return redirect(url_for('auth.login'))
+    if request.method == 'POST':
+        logout_user()
+        flash('You have been logged out.', category='success')
+        return redirect(url_for('auth.login'))
+
+    return redirect(url_for('main.dashboard'))
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():

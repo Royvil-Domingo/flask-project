@@ -1,0 +1,22 @@
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content logout-modal-card">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center px-4 pb-4 pt-0">
+        <img src="{{ url_for('static', filename='images/usagi.png') }}" alt="" class="logout-hero" aria-hidden="true">
+        <h5 id="logoutModalLabel" class="modal-title mb-2">Leaving already?</h5>
+        <p class="mb-4 text-muted">You'll need to sign in again to request or manage equipment.</p>
+
+        <form method="POST" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-outline-secondary logout-stay" data-bs-dismiss="modal">Stay</button>
+            <button type="submit" class="btn btn-primary logout-confirm">Log out</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
